@@ -1,6 +1,26 @@
 import sublime, sublime_plugin
 import re
 
+class SelectBarCommand(sublime_plugin.TextCommand):
+	# select each line of the selected bars
+	def run(self, edit):
+		sels = self.view.sel()
+		helper = Helper()
+
+		new_sels = []
+		units = 16
+
+		for sel in sels:
+			regions = helper.getBarSelection(self.view, sel, units)
+
+			for reg in regions:
+				new_sels.append(reg)
+
+		sels.clear()
+		for reg in new_sels:
+			sels.add(reg)
+
+
 class NewBarCommand(sublime_plugin.TextCommand):
 	# insert an empty bar after the selected ones
 	def run(self, edit):
@@ -22,7 +42,6 @@ class NewBarCommand(sublime_plugin.TextCommand):
 
 			# save the begining of the new bar as the curser position after insertion
 			final_pos.append(sublime.Region(regions[0].end(), regions[len(regions) - 1].begin() + offset))
-
 
 		# set the cursor to the saved positions
 		sels.clear()
@@ -66,7 +85,14 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 			sels.add(pos)
 
 
+class NewLineAfterBarCommand(sublime_plugin.TextCommand):
+	# break the whole tab-line after the selected bar
+	def run(self, edit):
+		pass
+		
+
 class Helper(object):
+	# return the regions of each line of the selected bar
 	def getBarSelection(self, view, sel, units):
 		lines = view.split_by_newlines(sel)
 

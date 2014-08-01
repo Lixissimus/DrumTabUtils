@@ -1,4 +1,6 @@
 [
+	{"keys": ["ctrl+j", "ctrl+s"], "command": "select_bar"},
 	{"keys": ["ctrl+j", "ctrl+n"], "command": "new_bar"},
-	{"keys": ["ctrl+j", "ctrl+d"], "command": "dublicate_bar"}
+	{"keys": ["ctrl+j", "ctrl+d"], "command": "dublicate_bar"},
+	{"keys": ["ctrl+j", "ctrl+enter"], "command": "new_line_after_bar"}
 ]
