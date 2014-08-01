@@ -1,0 +1,4 @@
+getInsertionPositions
+	-- bei einer Zeile muss Markierung bis zum Ende erweitert werden
+
+- Methode, die ganzen Takt markiert?

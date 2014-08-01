@@ -1,0 +1,4 @@
+[
+	{"keys": ["ctrl+j", "ctrl+n"], "command": "new_bar"},
+	{"keys": ["ctrl+j", "ctrl+d"], "command": "dublicate_bar"}
+]
