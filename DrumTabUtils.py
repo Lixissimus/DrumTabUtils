@@ -9,20 +9,18 @@ class NewBarCommand(sublime_plugin.TextCommand):
 		helper = Helper()
 
 		final_pos = []
-		new_sels = []
 		units = 16
-		offset = 0
 
 		for sel in sels:
+			offset = 0
+			new_sels = []
 			regions = helper.getBarSelection(self.view, sel, units)
-			for reg in regions:
-				new_sels.append(reg)
 
 			final_pos.append(regions[0].end())
 
-		for new_sel in new_sels:
-			self.view.insert(edit, new_sel.end() + offset, "-" * units + "|")
-			offset += units + 1
+			for new_sel in regions:
+				self.view.insert(edit, new_sel.end() + offset, "-" * units + "|")
+				offset += units + 1
 
 		sels.clear()
 		for pos in final_pos:
@@ -34,8 +32,6 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 		self.view.insert(edit, 0, "dublicate")
 
 class Helper(object):
-	def __init__(self):
-		super(Helper, self).__init__()
 
 	def getBarSelection(self, view, sel, units):
 		lines = view.split_by_newlines(sel)

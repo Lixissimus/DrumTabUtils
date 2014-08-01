@@ -1,4 +1,4 @@
-getInsertionPositions
+getBarSelection
 	-- bei einer Zeile muss Markierung bis zum Ende erweitert werden
 
-- Methode, die ganzen Takt markiert?
++- Methode, die ganzen Takt markiert?
