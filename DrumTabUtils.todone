@@ -1,5 +1,5 @@
 getBarSelection
 	-- bei einer Zeile muss Markierung bis zum Ende erweitert werden
 
-- alle Zeilen nach dem Ausführen von Kommandos markiert lassen, damit nächstes Kommando direkt ausgeführt werden kann
++- alle Zeilen nach dem Ausführen von Kommandos markiert lassen, damit nächstes Kommando direkt ausgeführt werden kann
 +- Methode, die ganzen Takt markiert?

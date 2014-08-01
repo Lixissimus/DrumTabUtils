@@ -2,7 +2,6 @@ import sublime, sublime_plugin
 import re
 
 class NewBarCommand(sublime_plugin.TextCommand):
-
 	# insert an empty bar after the selected ones
 	def run(self, edit):
 		sels = self.view.sel()
@@ -16,18 +15,23 @@ class NewBarCommand(sublime_plugin.TextCommand):
 			new_sels = []
 			regions = helper.getBarSelection(self.view, sel, units)
 
-			final_pos.append(regions[0].end())
-
+			# insert the empty bar after the selected one
 			for reg in regions:
 				self.view.insert(edit, reg.end() + offset, "-" * units + "|")
 				offset += units + 1
 
+			# save the begining of the new bar as the curser position after insertion
+			final_pos.append(sublime.Region(regions[0].end(), regions[len(regions) - 1].begin() + offset))
+
+
+		# set the cursor to the saved positions
 		sels.clear()
 		for pos in final_pos:
 			sels.add(pos)
 
 
 class DublicateBarCommand(sublime_plugin.TextCommand):
+	# dublicate the bars and insert them after the selected ones
 	def run(self, edit):
 		sels = self.view.sel()
 		helper = Helper()
@@ -40,13 +44,12 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 			new_sels = []
 			regions = helper.getBarSelection(self.view, sel, units)
 
-			final_pos.append(regions[0].end())
-
 			# to avoid weird offset calculations, we create the insertions before inserting
 			dublicates = []
 			for reg in regions:
 				dublicates.append(self.view.substr(reg))
 
+			# insert the appropriate strings after the selected bar
 			i = 0
 			for reg in regions:
 				insert_string = dublicates[i]
@@ -54,13 +57,16 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 				offset += len(insert_string)
 				i += 1
 
+			# save the begining of the new bar as the curser position after insertion
+			final_pos.append(sublime.Region(regions[0].end(), regions[len(regions) - 1].begin() + offset))
+
+		# set the cursor to the saved positions
 		sels.clear()
 		for pos in final_pos:
 			sels.add(pos)
 
 
 class Helper(object):
-
 	def getBarSelection(self, view, sel, units):
 		lines = view.split_by_newlines(sel)
 
@@ -82,8 +88,8 @@ class Helper(object):
 			begin_pos = end_pos - units - 1
 			bar_regions.append(sublime.Region(begin_pos, end_pos))
 
+		# add last line
 		if len(lines) > 1:
-			# add last line
 			sel_to_end = sublime.Region(lines[len(lines) - 1].end(), lines[len(lines) - 1].end() + length)
 			match_len = len(re.match('.*?\|', view.substr(sel_to_end)).group(0))
 			end_pos = sel_to_end.begin() + match_len
