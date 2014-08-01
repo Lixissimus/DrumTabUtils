@@ -8,22 +8,25 @@ class NewBarCommand(sublime_plugin.TextCommand):
 		sels = self.view.sel()
 		helper = Helper()
 
-		lines = []
+		final_pos = []
 		new_sels = []
 		units = 16
+		offset = 0
 
 		for sel in sels:
-			insert_positions = helper.getInsertionPositions(self.view, sel)
-			new_sels.append(insert_positions[0])
+			regions = helper.getBarSelection(self.view, sel, units)
+			for reg in regions:
+				new_sels.append(reg)
 
-			offset = 0
-			for insert_position in insert_positions:
-				self.view.insert(edit, insert_position + offset, "-" * units + "|")
-				offset += units + 1
+			final_pos.append(regions[0].end())
+
+		for new_sel in new_sels:
+			self.view.insert(edit, new_sel.end() + offset, "-" * units + "|")
+			offset += units + 1
 
 		sels.clear()
-		for sel in new_sels:
-			sels.add(sel)
+		for pos in final_pos:
+			sels.add(pos)
 
 
 class DublicateBarCommand(sublime_plugin.TextCommand):
@@ -34,27 +37,36 @@ class Helper(object):
 	def __init__(self):
 		super(Helper, self).__init__()
 
-	def getInsertionPositions(self, view, sel):
+	def getBarSelection(self, view, sel, units):
 		lines = view.split_by_newlines(sel)
 
-		insert_positions = []
+		bar_regions = []
 
 		# add first line
 		length = len(view.substr(lines[0]))
 		match = re.match('.*?\|', view.substr(lines[0])).group(0)
 		match_len = len(match)
-		insert_positions.append(lines[0].begin() + match_len)
+		end_pos = lines[0].begin() + match_len
+		begin_pos = end_pos - units - 1
+		print(begin_pos, end_pos)
+		bar_regions.append(sublime.Region(begin_pos, end_pos))
 
 		# add second to n-1 lines
 		for i in range(1, len(lines) - 1):
 			sel_to_end = sublime.Region(lines[i].end() - length, lines[i].end())
 			match_len = len(re.match('.*?\|', view.substr(sel_to_end)).group(0))
-			insert_positions.append(sel_to_end.begin() + match_len)
+			end_pos = sel_to_end.begin() + match_len
+			begin_pos = end_pos - units - 1
+			print(begin_pos, end_pos)
+			bar_regions.append(sublime.Region(begin_pos, end_pos))
 
 		if len(lines) > 1:
 			# add last line
 			sel_to_end = sublime.Region(lines[len(lines) - 1].end(), lines[len(lines) - 1].end() + length)
 			match_len = len(re.match('.*?\|', view.substr(sel_to_end)).group(0))
-			insert_positions.append(sel_to_end.begin() + match_len)
+			end_pos = sel_to_end.begin() + match_len
+			begin_pos = end_pos - units - 1
+			print(begin_pos, end_pos)
+			bar_regions.append(sublime.Region(begin_pos, end_pos))
 
-		return insert_positions		
+		return bar_regions
