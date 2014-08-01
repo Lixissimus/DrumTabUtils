@@ -18,8 +18,8 @@ class NewBarCommand(sublime_plugin.TextCommand):
 
 			final_pos.append(regions[0].end())
 
-			for new_sel in regions:
-				self.view.insert(edit, new_sel.end() + offset, "-" * units + "|")
+			for reg in regions:
+				self.view.insert(edit, reg.end() + offset, "-" * units + "|")
 				offset += units + 1
 
 		sels.clear()
@@ -29,7 +29,35 @@ class NewBarCommand(sublime_plugin.TextCommand):
 
 class DublicateBarCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
-		self.view.insert(edit, 0, "dublicate")
+		sels = self.view.sel()
+		helper = Helper()
+
+		final_pos = []
+		units = 16
+
+		for sel in sels:
+			offset = 0
+			new_sels = []
+			regions = helper.getBarSelection(self.view, sel, units)
+
+			final_pos.append(regions[0].end())
+
+			# to avoid weird offset calculations, we create the insertions before inserting
+			dublicates = []
+			for reg in regions:
+				dublicates.append(self.view.substr(reg))
+
+			i = 0
+			for reg in regions:
+				insert_string = dublicates[i]
+				self.view.insert(edit, reg.end() + offset, insert_string)
+				offset += len(insert_string)
+				i += 1
+
+		sels.clear()
+		for pos in final_pos:
+			sels.add(pos)
+
 
 class Helper(object):
 
@@ -44,7 +72,6 @@ class Helper(object):
 		match_len = len(match)
 		end_pos = lines[0].begin() + match_len
 		begin_pos = end_pos - units - 1
-		print(begin_pos, end_pos)
 		bar_regions.append(sublime.Region(begin_pos, end_pos))
 
 		# add second to n-1 lines
@@ -53,7 +80,6 @@ class Helper(object):
 			match_len = len(re.match('.*?\|', view.substr(sel_to_end)).group(0))
 			end_pos = sel_to_end.begin() + match_len
 			begin_pos = end_pos - units - 1
-			print(begin_pos, end_pos)
 			bar_regions.append(sublime.Region(begin_pos, end_pos))
 
 		if len(lines) > 1:
@@ -62,7 +88,6 @@ class Helper(object):
 			match_len = len(re.match('.*?\|', view.substr(sel_to_end)).group(0))
 			end_pos = sel_to_end.begin() + match_len
 			begin_pos = end_pos - units - 1
-			print(begin_pos, end_pos)
 			bar_regions.append(sublime.Region(begin_pos, end_pos))
 
 		return bar_regions
