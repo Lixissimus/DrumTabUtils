@@ -85,6 +85,25 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 			sels.add(pos)
 
 
+class RemoveBarCommand(sublime_plugin.TextCommand):
+	# remove the selected bar
+	def run(self, edit):
+		sels = self.view.sel()
+		helper = Helper()
+
+		units = 16
+
+		for sel in sels:
+			offset = 0
+			regions = helper.getBarSelection(self.view, sel, units)
+
+			# remove the selcted bar
+			for reg in regions:
+				length = len(self.view.substr(reg))
+				self.view.erase(edit, sublime.Region(reg.begin() + offset, reg.end() + offset))
+				offset -= length
+
+
 class NewLineAfterBarCommand(sublime_plugin.TextCommand):
 	# break the whole tab-line after the selected bar
 	def run(self, edit):
