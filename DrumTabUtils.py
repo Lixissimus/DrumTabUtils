@@ -8,7 +8,7 @@ class SelectBarCommand(sublime_plugin.TextCommand):
 		helper = Helper()
 
 		new_sels = []
-		units = 16
+		units = helper.getNumberOfUnits()
 
 		for sel in sels:
 			regions = helper.getBarSelection(self.view, sel, units)
@@ -28,14 +28,14 @@ class NewBarCommand(sublime_plugin.TextCommand):
 		helper = Helper()
 
 		final_pos = []
-		units = 16
+		units = helper.getNumberOfUnits()
 
 		for sel in sels:
 			offset = 0
 			new_sels = []
 			regions = helper.getBarSelection(self.view, sel, units)
 
-			# insert the empty bar after the selected one
+	# insert the empty bar after the selected one
 			for reg in regions:
 				self.view.insert(edit, reg.end() + offset, "-" * units + "|")
 				offset += units + 1
@@ -56,7 +56,7 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 		helper = Helper()
 
 		final_pos = []
-		units = 16
+		units = helper.getNumberOfUnits()
 
 		for sel in sels:
 			offset = 0
@@ -91,7 +91,7 @@ class RemoveBarCommand(sublime_plugin.TextCommand):
 		sels = self.view.sel()
 		helper = Helper()
 
-		units = 16
+		units = helper.getNumberOfUnits()
 
 		for sel in sels:
 			offset = 0
@@ -142,3 +142,6 @@ class Helper(object):
 			bar_regions.append(sublime.Region(begin_pos, end_pos))
 
 		return bar_regions
+
+	def getNumberOfUnits(self):
+		return 16
