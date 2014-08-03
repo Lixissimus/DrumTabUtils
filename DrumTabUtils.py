@@ -8,10 +8,9 @@ class SelectBarCommand(sublime_plugin.TextCommand):
 		helper = Helper()
 
 		new_sels = []
-		units = helper.getNumberOfUnits()
 
 		for sel in sels:
-			regions = helper.getBarSelection(self.view, sel, units)
+			regions = helper.getBarSelection(self.view, sel)
 
 			for reg in regions:
 				new_sels.append(reg)
@@ -28,14 +27,14 @@ class NewBarCommand(sublime_plugin.TextCommand):
 		helper = Helper()
 
 		final_pos = []
-		units = helper.getNumberOfUnits()
 
 		for sel in sels:
 			offset = 0
 			new_sels = []
-			regions = helper.getBarSelection(self.view, sel, units)
+			regions = helper.getBarSelection(self.view, sel)
+			units = len(self.view.substr(regions[0])) - 1
 
-	# insert the empty bar after the selected one
+			# insert the empty bar after the selected one
 			for reg in regions:
 				self.view.insert(edit, reg.end() + offset, "-" * units + "|")
 				offset += units + 1
@@ -56,12 +55,11 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 		helper = Helper()
 
 		final_pos = []
-		units = helper.getNumberOfUnits()
 
 		for sel in sels:
 			offset = 0
 			new_sels = []
-			regions = helper.getBarSelection(self.view, sel, units)
+			regions = helper.getBarSelection(self.view, sel)
 
 			# to avoid weird offset calculations, we create the insertions before inserting
 			dublicates = []
@@ -91,11 +89,9 @@ class RemoveBarCommand(sublime_plugin.TextCommand):
 		sels = self.view.sel()
 		helper = Helper()
 
-		units = helper.getNumberOfUnits()
-
 		for sel in sels:
 			offset = 0
-			regions = helper.getBarSelection(self.view, sel, units)
+			regions = helper.getBarSelection(self.view, sel)
 
 			# remove the selcted bar
 			for reg in regions:
@@ -112,7 +108,7 @@ class NewLineAfterBarCommand(sublime_plugin.TextCommand):
 
 class Helper(object):
 	# return the regions of each line of the selected bar
-	def getBarSelection(self, view, sel, units):
+	def getBarSelection(self, view, sel):
 		lines = view.split_by_newlines(sel)
 
 		bar_regions = []
@@ -122,6 +118,15 @@ class Helper(object):
 		match = re.match('.*?\|', view.substr(lines[0])).group(0)
 		match_len = len(match)
 		end_pos = lines[0].begin() + match_len
+
+		# extract the number of units in the selected bar
+		(row, col) = view.rowcol(end_pos)
+		line_begin = view.text_point(row, 0)
+		line_content = view.substr(sublime.Region(line_begin, end_pos))
+		# match the last bar in the selection, indicated by the surrounding |'s
+		# substract the number of |'s to get the number of units
+		units = len(re.search('\|[^|]*\|$', line_content).group(0)) - 2
+
 		begin_pos = end_pos - units - 1
 		bar_regions.append(sublime.Region(begin_pos, end_pos))
 
@@ -142,6 +147,9 @@ class Helper(object):
 			bar_regions.append(sublime.Region(begin_pos, end_pos))
 
 		return bar_regions
+
+	def calculateUnits(self, view, sel):
+		pass
 
 	def getNumberOfUnits(self):
 		return 16

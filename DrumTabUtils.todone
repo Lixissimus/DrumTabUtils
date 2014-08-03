@@ -3,4 +3,6 @@ getBarSelection
 
 +- alle Zeilen nach dem Ausführen von Kommandos markiert lassen, damit nächstes Kommando direkt ausgeführt werden kann
 +- Methode, die ganzen Takt markiert?
-- Markierungen vor Kommandos normalisieren, d.h. Spalte von Anfang == Spalte von Ende
++- Markierungen vor Kommandos normalisieren, d.h. Spalte von Anfang == Spalte von Ende
+
+- Einfügen funktioniert nicht, wenn einzelne Zeilen verschiedene Längen haben
