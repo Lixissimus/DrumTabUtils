@@ -113,43 +113,33 @@ class Helper(object):
 
 		bar_regions = []
 
-		# add first line
-		length = len(view.substr(lines[0]))
-		match = re.match('.*?\|', view.substr(lines[0])).group(0)
-		match_len = len(match)
-		end_pos = lines[0].begin() + match_len
+		# save the selection's start column, since this defines the bar that will be selected
+		(first_row, first_col) = view.rowcol(sel.begin())
 
-		# extract the number of units in the selected bar
-		(row, col) = view.rowcol(end_pos)
-		line_begin = view.text_point(row, 0)
-		line_content = view.substr(sublime.Region(line_begin, end_pos))
-		# match the last bar in the selection, indicated by the surrounding |'s
-		# substract the number of |'s to get the number of units
-		units = len(re.search('\|[^|]*\|$', line_content).group(0)) - 2
-
-		begin_pos = end_pos - units - 1
-		bar_regions.append(sublime.Region(begin_pos, end_pos))
-
-		# add second to n-1 lines
-		for i in range(1, len(lines) - 1):
-			sel_to_end = sublime.Region(lines[i].end() - length, lines[i].end())
-			match_len = len(re.match('.*?\|', view.substr(sel_to_end)).group(0))
-			end_pos = sel_to_end.begin() + match_len
-			begin_pos = end_pos - units - 1
-			bar_regions.append(sublime.Region(begin_pos, end_pos))
-
-		# add last line
-		if len(lines) > 1:
-			sel_to_end = sublime.Region(lines[len(lines) - 1].end(), lines[len(lines) - 1].end() + length)
-			match_len = len(re.match('.*?\|', view.substr(sel_to_end)).group(0))
-			end_pos = sel_to_end.begin() + match_len
-			begin_pos = end_pos - units - 1
-			bar_regions.append(sublime.Region(begin_pos, end_pos))
+		for line in lines:
+			# get the line's row
+			(cur_row, cur_col) = view.rowcol(line.begin())
+			# calculate a point (selection point) defined by the line's row and the selction's column
+			# this is always a point, that is in the current line and the selected bar
+			sel_point = view.text_point(cur_row, first_col)
+			# get the beginning and the end point of the current line
+			line_start_point = view.line(sel_point).begin()
+			line_end_point = view.line(sel_point).end()
+			# get the (l)ast (p)art of the line, beginning at the line's selection point
+			lp_line = view.substr(sublime.Region(sel_point, line_end_point))
+			# detect the (l)ast (p)art of the bar, the end is defines by the closing |
+			# 'match' just finds a match at the beginning of the string
+			lp_bar = re.match('.*?\|', lp_line).group(0)
+			# this defines the end point of the bar
+			end_point = sel_point + len(lp_bar)
+			# get the string from the line's beginning to the bar's end point
+			line_to_bar_end = view.substr(sublime.Region(line_start_point, end_point))
+			# detect a full bar at the end of previously extracted string
+			# this string contains the selected bar (one line of it)
+			bar_string = re.search('\|[^|]*\|$', line_to_bar_end).group(0)
+			# the + 1 is needed to exclude the opening | from the selection
+			start_point = end_point - len(bar_string) + 1
+			# create a new region and save it
+			bar_regions.append(sublime.Region(start_point, end_point))
 
 		return bar_regions
-
-	def calculateUnits(self, view, sel):
-		pass
-
-	def getNumberOfUnits(self):
-		return 16
