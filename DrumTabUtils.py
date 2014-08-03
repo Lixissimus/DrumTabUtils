@@ -30,8 +30,8 @@ class NewBarCommand(sublime_plugin.TextCommand):
 
 		for sel in sels:
 			offset = 0
-			new_sels = []
 			regions = helper.getBarSelection(self.view, sel)
+			# calculate the number of units in one bar, exclude the closing | in the calculation
 			units = len(self.view.substr(regions[0])) - 1
 
 			# insert the empty bar after the selected one
@@ -39,7 +39,7 @@ class NewBarCommand(sublime_plugin.TextCommand):
 				self.view.insert(edit, reg.end() + offset, "-" * units + "|")
 				offset += units + 1
 
-			# save the begining of the new bar as the curser position after insertion
+			# save the beginning of the new bar to set back the curser position after insertion
 			final_pos.append(sublime.Region(regions[0].end(), regions[len(regions) - 1].begin() + offset))
 
 		# set the cursor to the saved positions
@@ -58,10 +58,9 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 
 		for sel in sels:
 			offset = 0
-			new_sels = []
 			regions = helper.getBarSelection(self.view, sel)
 
-			# to avoid weird offset calculations, we create the insertions before inserting
+			# to avoid weird offset calculations, create the insertions before inserting something
 			dublicates = []
 			for reg in regions:
 				dublicates.append(self.view.substr(reg))
@@ -74,7 +73,7 @@ class DublicateBarCommand(sublime_plugin.TextCommand):
 				offset += len(insert_string)
 				i += 1
 
-			# save the begining of the new bar as the curser position after insertion
+			# save the beginning of the new bar to set back the curser position after insertion
 			final_pos.append(sublime.Region(regions[0].end(), regions[len(regions) - 1].begin() + offset))
 
 		# set the cursor to the saved positions
